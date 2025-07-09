@@ -143,7 +143,7 @@ open class KSTokenView: UIView {
     fileprivate var _resultArray = [AnyObject]()
     fileprivate var _showingSearchResult = false
     fileprivate var _indicator = UIActivityIndicatorView(style: UIActivityIndicatorView.Style.medium)
-    fileprivate var _searchResultHeight: CGFloat = 200.0
+    fileprivate var _searchResultHeight: CGFloat = Constants.Defaults.searchResultHeight
     fileprivate var _lastSearchString: String = ""
     fileprivate var _intrinsicContentHeight: CGFloat = UIView.noIntrinsicMetric
     
@@ -183,7 +183,7 @@ open class KSTokenView: UIView {
     @objc weak open var delegate: KSTokenViewDelegate?
     
     /// default is .Vertical.
-    @objc open var direction: KSTokenViewScrollDirection = .vertical {
+    @objc open var direction: KSTokenViewScrollDirection = Constants.Defaults.direction {
         didSet {
             _updateTokenField()
         }
@@ -208,15 +208,15 @@ open class KSTokenView: UIView {
     }
     
     /// Default is (TokenViewWidth, 200)
-    @objc open var searchResultHeight: CGFloat = 200 {
+    @objc open var searchResultHeight: CGFloat = Constants.Defaults.searchResultHeight {
         didSet {
             _searchResultHeight = searchResultHeight
             _searchTableView.frame.size.height = searchResultHeight
         }
     }
     
-    /// Default is whiteColor()
-    @objc open var searchResultBackgroundColor: UIColor = UIColor.white {
+    /// Default is white
+    @objc open var searchResultBackgroundColor: UIColor = Constants.Defaults.searchResultBackgroundColor {
         didSet {
             _searchTableView.backgroundColor = searchResultBackgroundColor
         }
@@ -236,8 +236,8 @@ open class KSTokenView: UIView {
         }
     }
     
-    /// default is UIColor.grayColor()
-    @objc open var cursorColor: UIColor = UIColor.gray {
+    /// default is gray
+    @objc open var cursorColor: UIColor = Constants.Defaults.cursorColor {
         didSet {
             _updateTokenField()
         }
@@ -271,7 +271,7 @@ open class KSTokenView: UIView {
     }
 
     /// default is 5.0. Horizontal margin between tokens
-    @objc open var marginX: CGFloat = 5.0 {
+    @objc open var marginX: CGFloat = Constants.Defaults.marginX {
         didSet {
             if (oldValue != marginX) {
                 _updateTokenField()
@@ -280,7 +280,7 @@ open class KSTokenView: UIView {
     }
     
     /// default is 5.0. Vertical margin between tokens
-    @objc open var marginY: CGFloat = 5.0 {
+    @objc open var marginY: CGFloat = Constants.Defaults.marginY {
         didSet {
             if (oldValue != marginY) {
                 _updateTokenField()
@@ -289,7 +289,7 @@ open class KSTokenView: UIView {
     }
     
     /// default is 0. Horizontal buffer between prompt and content
-    @objc open var bufferX: CGFloat = 0.0 {
+    @objc open var bufferX: CGFloat = Constants.Defaults.bufferX {
         didSet {
             if (oldValue != bufferX) {
                 _updateTokenField()
@@ -298,7 +298,7 @@ open class KSTokenView: UIView {
     }
     
     /// default is UIFont.systemFontOfSize(16)
-    @objc open var font: UIFont = UIFont.systemFont(ofSize: 16) {
+    @objc open var font: UIFont = KSToken.Constants.Defaults.font {
         didSet {
             if (oldValue != font) {
                 _updateTokenField()
@@ -316,7 +316,7 @@ open class KSTokenView: UIView {
     }
     
     /// default is ", ". Used to separate titles when untoknized
-    @objc open var separatorText: String = ", " {
+    @objc open var separatorText: String = Constants.Defaults.separatorText {
         didSet {
             if (oldValue != separatorText) {
                 _updateTokenField()
@@ -524,10 +524,7 @@ open class KSTokenView: UIView {
     }
     
     fileprivate func _lastToken() -> KSToken? {
-        if _tokenField.tokens.count == 0 {
-            return nil
-        }
-        return _tokenField.tokens.last
+        _tokenField.tokens.last
     }
     
     fileprivate func _removeToken(_ token: KSToken, removingAll: Bool = false) {
@@ -701,20 +698,16 @@ open class KSTokenView: UIView {
      Deletes last added KSToken object
      */
     open func deleteLastToken() {
-        let token: KSToken? = _lastToken()
-        if token != nil {
-            _removeToken(token!)
-        }
+        guard let token = _lastToken() else { return }
+        _removeToken(token)
     }
     
     /**
      Deletes selected KSToken object
      */
     open func deleteSelectedToken() {
-        let token: KSToken? = selectedToken()
-        if (token != nil) {
-            _removeToken(token!)
-        }
+        guard let token = selectedToken() else { return }
+        _removeToken(token)
     }
     
     /**
@@ -769,16 +762,15 @@ open class KSTokenView: UIView {
      - parameter string: Search keyword
      */
     fileprivate func _startSearchWithString(_ string: String) {
-        if (!_canAddMoreToken()) {
-            return
-        }
+        guard _canAddMoreToken() else { return }
         _showEmptyResults()
         _showActivityIndicator()
         
         let trimmedSearchString = string.trimmingCharacters(in: CharacterSet.whitespaces)
-        delegate?.tokenView(self, performSearchWithString:trimmedSearchString, completion: { (results) -> Void in
+        delegate?.tokenView(self, performSearchWithString:trimmedSearchString, completion: { [weak self] (results) -> Void in
+            guard let self else { return }
             self._hideActivityIndicator()
-            if (results.count > 0) {
+            if !results.isEmpty {
                 self._displayData(results)
             }
         })
@@ -818,9 +810,7 @@ open class KSTokenView: UIView {
     }
     
     fileprivate func _repositionSearchResults(_ height: CGFloat) {
-        if (!_showingSearchResult) {
-            return
-        }
+        guard _showingSearchResult else { return }
         _searchTableView.frame.origin = CGPoint(x: 0, y: height)
     }
     
@@ -906,6 +896,7 @@ open class KSTokenView: UIView {
 //__________________________________________________________________________________
 //
 extension KSTokenView : KSTokenFieldDelegate {
+    
     func tokenFieldDidSelectToken(_ token: KSToken) {
         delegate?.tokenView?(self, didSelectToken: token)
     }
@@ -921,6 +912,7 @@ extension KSTokenView : KSTokenFieldDelegate {
     func tokenLongPressed(_ token: KSToken) {
         delegate?.tokenView?(self, didLongPress: token)
     }
+    
 }
 
 
@@ -928,22 +920,23 @@ extension KSTokenView : KSTokenFieldDelegate {
 //__________________________________________________________________________________
 //
 extension KSTokenView : UITextFieldDelegate {
+    
     public func textField(_ textField: UITextField, shouldChangeCharactersIn range: NSRange, replacementString string: String) -> Bool {
         
         // If backspace is pressed
-        if (_tokenField.tokens.count > 0 && _tokenField.text == KSTextEmpty && string.isEmpty == true && shouldDeleteTokenOnBackspace) {
-            if (_lastToken() != nil) {
-                if (selectedToken() != nil) {
+        if (!_tokenField.tokens.isEmpty) && _tokenField.text == KSTextEmpty && string.isEmpty == true && shouldDeleteTokenOnBackspace {
+            if let lastToken = _lastToken() {
+                if let _ = selectedToken() {
                     deleteSelectedToken()
                 } else {
-                    _tokenField.selectToken(_lastToken()!)
+                    _tokenField.selectToken(lastToken)
                 }
             }
             return false
         }
         
         // Prevent removing KSTextEmpty
-        if (string.isEmpty == true && _tokenField.text == KSTextEmpty) {
+        if string.isEmpty && _tokenField.text == KSTextEmpty {
             return false
         }
         
@@ -952,13 +945,13 @@ extension KSTokenView : UITextFieldDelegate {
         var olderTextTrimmed = olderText
         
         // remove the empty text marker from the beginning of the string
-        if (olderText.first == KSTextEmpty.first) {
+        if olderText.first == KSTextEmpty.first {
             olderTextTrimmed = String(olderText.dropFirst())
         }
         
         // Check if character is removed at some index
         // Remove character at that index
-        if (string.isEmpty) {
+        if string.isEmpty {
             // Safely convert NSRange to Swift Range
             if let rangeInText = Range(range, in: olderText) {
                 var mutableText = olderText
@@ -1002,6 +995,7 @@ extension KSTokenView : UITextFieldDelegate {
         resignFirstResponder()
         return true
     }
+    
 }
 
 //MARK: - Extension UITableViewDelegate
@@ -1025,14 +1019,14 @@ extension KSTokenView : UITableViewDelegate {
             addToken(token)
         }
         
-        if (shouldHideSearchResultsOnSelect) {
+        if shouldHideSearchResultsOnSelect {
             _hideSearchResults()
-            
-        } else if (!shouldDisplayAlreadyTokenized) {
+        } else if !shouldDisplayAlreadyTokenized {
             _resultArray.remove(at: (indexPath as NSIndexPath).row)
             tableView.deleteRows(at: [indexPath], with: UITableView.RowAnimation.left)
         }
     }
+    
 }
 
 //MARK: - Extension UITableViewDataSource
@@ -1045,21 +1039,38 @@ extension KSTokenView : UITableViewDataSource {
     }
     
     public func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        
-        var cell: UITableViewCell? = delegate?.tokenView?(self, withObject: _resultArray[(indexPath as NSIndexPath).row], tableView: tableView, cellForRowAtIndexPath: indexPath)
-        if cell != nil {
-            return cell!
-        }
-        
-        let cellIdentifier = "KSSearchTableCell"
-        cell = tableView.dequeueReusableCell(withIdentifier: cellIdentifier) as UITableViewCell?
-        if (cell == nil) {
-            cell = UITableViewCell(style: UITableViewCell.CellStyle.default, reuseIdentifier: cellIdentifier)
+        let cell: UITableViewCell
+        if let _cell: UITableViewCell = delegate?.tokenView?(self, withObject: _resultArray[(indexPath as NSIndexPath).row], tableView: tableView, cellForRowAtIndexPath: indexPath) {
+            cell = _cell
+        } else if let _cell = tableView.dequeueReusableCell(withIdentifier: Constants.cellIdentifier) {
+            cell = _cell
+        } else {
+            cell = UITableViewCell(style: UITableViewCell.CellStyle.default, reuseIdentifier: Constants.cellIdentifier)
         }
         
         let title = delegate?.tokenView(self, displayTitleForObject: _resultArray[(indexPath as NSIndexPath).row])
-        cell!.textLabel!.text = (title != nil) ? title : "No Title"
-        cell!.selectionStyle = UITableViewCell.SelectionStyle.none
-        return cell!
+        cell.textLabel?.text = (title != nil) ? title : "No Title"
+        cell.selectionStyle = UITableViewCell.SelectionStyle.none
+        return cell
+    }
+}
+
+//MARK: - Constants
+//__________________________________________________________________________________
+//
+
+public extension KSTokenView { enum Constants {} }
+public extension KSTokenView.Constants {
+    static let cellIdentifier = "KSSearchTableCell"
+    
+    enum Defaults {
+        static let direction: KSTokenViewScrollDirection = .vertical
+        static let searchResultHeight: CGFloat = 200
+        static let searchResultBackgroundColor = UIColor.white
+        static let cursorColor: UIColor = UIColor.gray
+        static let marginX: CGFloat = 5.0
+        static let marginY: CGFloat = 5.0
+        static let bufferX: CGFloat = 0.0
+        static let separatorText: String = ", "
     }
 }

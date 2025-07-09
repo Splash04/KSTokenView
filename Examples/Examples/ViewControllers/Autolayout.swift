@@ -75,4 +75,8 @@ extension Autolayout: KSTokenViewDelegate {
         
         return true
     }
+    
+    func tokenView(_ tokenView: KSTokenView, didSelectToken token: KSToken) {
+        print("Token selected: \(token.title)")
+    }
 }

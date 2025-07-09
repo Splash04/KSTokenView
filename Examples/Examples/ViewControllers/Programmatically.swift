@@ -119,4 +119,8 @@ extension Programmatically: KSTokenViewDelegate {
         tokenView.deleteToken(token)
     }
     
+    func tokenView(_ tokenView: KSTokenView, didSelectToken token: KSToken) {
+        print("Token selected: \(token.title)")
+    }
+    
 }

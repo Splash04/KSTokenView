@@ -31,10 +31,10 @@ import AVFoundation
 open class KSToken : UIControl {
     
     protocol KSTokenGlobalConfig: AnyObject {
-        func tokenFont() -> UIFont?
-        func contentInset() -> UIEdgeInsets?
-        func imagePadding() -> CGFloat?
-        func imagePlacement() -> KSTokenImagePlacement?
+        func tokenFont() -> UIFont
+        func contentInset() -> UIEdgeInsets
+        func imagePadding() -> CGFloat
+        func imagePlacement() -> KSTokenImagePlacement
     }
     
     //MARK: - Public Properties
@@ -49,7 +49,11 @@ open class KSToken : UIControl {
     }
     
     /// default is ""
-    open var title = ""
+    open var title = "" {
+        didSet {
+            accessibilityLabel = title
+        }
+    }
     
     /// default is nil. Any Custom object.
     open var object: AnyObject?
@@ -58,16 +62,16 @@ open class KSToken : UIControl {
     open var sticky = false
     
     /// default is 15
-     open var tokenCornerRadius:CGFloat = 15.0
+    open var tokenCornerRadius: CGFloat = Constants.Defaults.cornerRadius
     
     /// default is nil. So it using font from Text Input
-    var tokenTextFont: UIFont? = nil
+    open var tokenTextFont: UIFont?
     
     /// Token Title color
-    open var tokenTextColor = UIColor(red: 255/255, green: 255/255, blue: 255/255, alpha: 1)
+    open var tokenTextColor = Constants.Defaults.textColor
     
     /// Token background color
-    open var tokenBackgroundColor = UIColor(red: 50/255, green: 50/255, blue: 255/255, alpha: 1)
+    open var tokenBackgroundColor = Constants.Defaults.backgroundColor
     
     /// Token title color in selected state
     open var tokenTextHighlightedColor: UIColor?
@@ -76,13 +80,13 @@ open class KSToken : UIControl {
     open var tokenBackgroundHighlightedColor: UIColor?
     
     /// Token background color in selected state. It doesn't have effect if 'tokenBackgroundHighlightedColor' is set
-    open var darkRatio: CGFloat = 0.75
+    open var darkRatio: CGFloat = Constants.Defaults.darkRatio
     
     /// Token border width
-    open var borderWidth: CGFloat = 0.0
+    open var borderWidth: CGFloat = Constants.Defaults.borderWidth
     
     ///Token border color
-    open var borderColor: UIColor = UIColor.black
+    open var borderColor: UIColor = Constants.Defaults.borderColor
     
     ///Token image
     open var image: UIImage?
@@ -100,13 +104,13 @@ open class KSToken : UIControl {
     open var contentInset: UIEdgeInsets?
     
     /// default is 200. Maximum width of token. After maximum limit is reached title is truncated at end with '...'
-    fileprivate var _maxWidth: CGFloat? = 200
+    fileprivate var _maxWidth: CGFloat? = Constants.Defaults.maxWidth
     open var maxWidth: CGFloat {
         get {
             return _maxWidth!
         }
         set (newWidth) {
-            if (_maxWidth != newWidth) {
+            if _maxWidth != newWidth {
                 _maxWidth = newWidth
                 sizeToFit()
                 setNeedsDisplay()
@@ -131,14 +135,14 @@ open class KSToken : UIControl {
     }
     
     convenience public init(title: String) {
-        self.init(title: title, image: nil, object: title as AnyObject?);
+        self.init(title: title, image: nil, object: title as AnyObject?)
     }
     
     convenience public init(title: String, object: AnyObject?) {
-        self.init(title: title, image: nil, object: object);
+        self.init(title: title, image: nil, object: object)
     }
     convenience public init(title: String, image: UIImage?) {
-        self.init(title: title, image: image, object: title as AnyObject?);
+        self.init(title: title, image: image, object: title as AnyObject?)
     }
     
     public init(title: String, image: UIImage?, object: AnyObject?) {
@@ -147,6 +151,9 @@ open class KSToken : UIControl {
         self.object = object
         super.init(frame: CGRect.zero)
         backgroundColor = UIColor.clear
+        isAccessibilityElement = true
+        accessibilityTraits = .button
+        accessibilityLabel = title
     }
     
     //MARK: - Drawing code
@@ -223,12 +230,12 @@ open class KSToken : UIControl {
         let rectangleFontAttributes = [NSAttributedString.Key.font: _font, NSAttributedString.Key.foregroundColor: textColor, NSAttributedString.Key.paragraphStyle: rectangleStyle] as [NSAttributedString.Key : Any]
         let textDrawableWidth = ceil(rect.width - baseImageHeight - _contentInsets.left - _contentInsets.right - paddingBetweenTitleAndImage)
         
-        let textHeight: CGFloat = KSUtils.getTitleRect(rectangleTextContent as NSString, width: textDrawableWidth, height: maxDrawableHeight , font: _font).size.height
+        let textHeight: CGFloat = ceil(KSUtils.getTitleRect(rectangleTextContent as NSString, width: textDrawableWidth, height: maxDrawableHeight , font: _font).size.height)
         let additionalImagePadding = imageInsetsForTextDrawing.left > 0 ? paddingBetweenTitleAndImage : 0
         let textWidth = min(maxWidth - _contentInsets.left - _contentInsets.right, textDrawableWidth)
         let textRect = CGRect(
             x: rect.minX + _contentInsets.left + imageInsetsForTextDrawing.left + additionalImagePadding,
-            y: rect.minY + (maxDrawableHeight - textHeight) / 2,
+            y: rect.minY + (maxDrawableHeight - textHeight) / 2.0,
             width: textWidth,
             height: maxDrawableHeight
         )
@@ -358,7 +365,7 @@ open class KSToken : UIControl {
             return CGSize(
                 width: baseHeight - imageWidthWithInsets,
                 height: baseHeight - imageHeightInsets
-            ) // square icon with the same size like a text
+            )
         }
     }
     
@@ -413,5 +420,12 @@ public extension KSToken.Constants {
         static let font = UIFont.systemFont(ofSize: 16)
         static let imagePlacement: KSTokenImagePlacement = .right
         static let imageSizeMode: KSTokenImageSizeMode = .fontBased(insets: .zero)
+        static let cornerRadius: CGFloat = 16
+        static let textColor = UIColor.white
+        static let backgroundColor = UIColor(red: 50/255, green: 50/255, blue: 255/255, alpha: 1)
+        static let borderColor = UIColor.black
+        static let maxWidth: CGFloat = 200
+        static let darkRatio: CGFloat = 0.75
+        static let borderWidth: CGFloat = 0
     }
 }

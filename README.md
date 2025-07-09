@@ -13,7 +13,7 @@ Click [here](https://appetize.io/app/0kzy34tyg761punebrcc1x556w) for Live Previe
 ### Token with image
 
 ![Token with image left](Assets/token_with_image_left.jpg)
-![Token with image right](token_with_image_right.jpg)
+![Token with image right](Assets/token_with_image_right.jpg)
 
 Token image preferences:
 ```swift

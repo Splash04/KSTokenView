@@ -43,7 +43,7 @@ enum KSTokenFieldState {
 open class KSTokenField: UITextField {
     
     // MARK: - Private Properties
-    fileprivate var _cursorColor: UIColor = UIColor.gray {
+    fileprivate var _cursorColor: UIColor = KSTokenView.Constants.Defaults.cursorColor {
         willSet {
             tintColor = newValue
         }
@@ -55,14 +55,14 @@ open class KSTokenField: UITextField {
     fileprivate var _placeholderLabel: UILabel?
     fileprivate var _state: KSTokenFieldState = .opened
     fileprivate var _minWidthForInput: CGFloat = 50.0
-    fileprivate var _separatorText: String?
-    fileprivate var _font: UIFont?
-    fileprivate var _contentInset: UIEdgeInsets?
-    fileprivate var _imagePadding: CGFloat?
-    fileprivate var _imagePlacement: KSTokenImagePlacement?
-    fileprivate var _marginX: CGFloat?
-    fileprivate var _marginY: CGFloat?
-    fileprivate var _bufferX: CGFloat?
+    fileprivate var _separatorText: String = KSTokenView.Constants.Defaults.separatorText
+    fileprivate var _font: UIFont = KSToken.Constants.Defaults.font
+    fileprivate var _contentInset: UIEdgeInsets = KSToken.Constants.Defaults.contentInsets
+    fileprivate var _imagePadding: CGFloat = KSToken.Constants.Defaults.imagePadding
+    fileprivate var _imagePlacement: KSTokenImagePlacement = KSToken.Constants.Defaults.imagePlacement
+    fileprivate var _marginX: CGFloat = KSTokenView.Constants.Defaults.marginX
+    fileprivate var _marginY: CGFloat = KSTokenView.Constants.Defaults.marginY
+    fileprivate var _bufferX: CGFloat = KSTokenView.Constants.Defaults.bufferX
     fileprivate var _removesTokensOnEndEditing = true
     fileprivate var _scrollView = UIScrollView(frame: .zero)
     fileprivate var _scrollPoint = CGPoint.zero
@@ -106,29 +106,29 @@ open class KSTokenField: UITextField {
     
     weak var parentView: KSTokenView? {
         willSet (tokenView) {
-            if (tokenView != nil) {
-                _cursorColor = tokenView!.cursorColor
-                _contentInset = tokenView!.contentInset
-                _imagePadding = tokenView!.imagePadding
-                _imagePlacement = tokenView!.imagePlacement
-                _marginX = tokenView!.marginX
-                _marginY = tokenView!.marginY
-                _bufferX = tokenView!.bufferX
-                _direction = tokenView!.direction
-                _font = tokenView!.font
-                if (_font != nil) {
+            if let tokenView {
+                _cursorColor = tokenView.cursorColor
+                _contentInset = tokenView.contentInset
+                _imagePadding = tokenView.imagePadding
+                _imagePlacement = tokenView.imagePlacement
+                _marginX = tokenView.marginX
+                _marginY = tokenView.marginY
+                _bufferX = tokenView.bufferX
+                _direction = tokenView.direction
+                _font = tokenView.font
+                if (_font != font) {
                     font = _font
                 }
-                _minWidthForInput = tokenView!.minWidthForInput
-                _separatorText = tokenView!.separatorText
-                _removesTokensOnEndEditing = tokenView!.removesTokensOnEndEditing
-                _descriptionText = tokenView!.descriptionText
-                placeHolderColor = tokenView!.placeholderColor
-                promptTextColor = tokenView!.promptColor
-                textColor = tokenView!.textColor
-                _setPromptText(tokenView!.promptText)
+                _minWidthForInput = tokenView.minWidthForInput
+                _separatorText = tokenView.separatorText
+                _removesTokensOnEndEditing = tokenView.removesTokensOnEndEditing
+                _descriptionText = tokenView.descriptionText
+                placeHolderColor = tokenView.placeholderColor
+                promptTextColor = tokenView.promptColor
+                textColor = tokenView.textColor
+                _setPromptText(tokenView.promptText)
                 
-                if (_setupCompleted) {
+                if _setupCompleted {
                     updateLayout()
                 }
             }
@@ -186,7 +186,7 @@ open class KSTokenField: UITextField {
     }
     
     fileprivate func _setScrollRect() {
-        let buffer:CGFloat = _bufferX ?? 0.0;
+        let buffer:CGFloat = _bufferX
         let width = frame.width - _leftViewRect().width
         let height = frame.height
         
@@ -397,7 +397,7 @@ open class KSTokenField: UITextField {
         }
         
         if _state == .closed {
-            return CGPoint(x: _marginX! + _bufferX!, y: _selfFrame.size.height)
+            return CGPoint(x: _marginX + _bufferX, y: _selfFrame.size.height)
         }
         
         if _direction == .horizontal {
@@ -408,36 +408,36 @@ open class KSTokenField: UITextField {
         let leftMargin = _leftViewRect().width
         let rightMargin = _rightViewRect().width
         
-        var tokenPosition = CGPoint(x: _marginX!, y: _marginY!)
-        let baseTokenHeight = KSUtils.getTokenHeight(font: _font!, insets: _contentInset!)
+        var tokenPosition = CGPoint(x: _marginX, y: _marginY)
+        let baseTokenHeight = KSUtils.getTokenHeight(font: _font, insets: _contentInset)
         
         for token: KSToken in tokens {
-            let tokenSize = KSUtils.getTokenRect(token: token, maxWidth: bounds.size.width, defaultFont: _font!, defaultInsets: _contentInset!, defaultImagePadding: _imagePadding!).size
+            let tokenSize = KSUtils.getTokenRect(token: token, maxWidth: bounds.size.width, defaultFont: _font, defaultInsets: _contentInset, defaultImagePadding: _imagePadding).size
             let tokenWidth = tokenSize.width
             let tokenHeight = tokenSize.height
             
             // Add token at specific position
             if let _ = token.superview {
-                if (tokenPosition.x + tokenWidth + _marginX! + leftMargin > bounds.size.width - rightMargin) {
+                if (tokenPosition.x + tokenWidth + _marginX + leftMargin > bounds.size.width - rightMargin) {
                     lineNumber += 1
-                    tokenPosition.x = _marginX!
-                    tokenPosition.y += (tokenHeight + _marginY!)
+                    tokenPosition.x = _marginX
+                    tokenPosition.y += (tokenHeight + _marginY)
                 }
                 
                 token.frame = CGRect(x: tokenPosition.x, y: tokenPosition.y, width: tokenWidth, height: tokenHeight)
-                tokenPosition.x += tokenWidth + _marginX!
+                tokenPosition.x += tokenWidth + _marginX
             }
         }
         
         // check if next token can be added in same line or new line
-        if (bounds.size.width - (tokenPosition.x + _marginX!) - leftMargin) < _minWidthForInput {
+        if (bounds.size.width - (tokenPosition.x + _marginX) - leftMargin) < _minWidthForInput {
             
             lineNumber += 1
-            tokenPosition.x = _marginX!
-            tokenPosition.y += (baseTokenHeight + _marginY!)
+            tokenPosition.x = _marginX
+            tokenPosition.y += (baseTokenHeight + _marginY)
         }
         
-        var positionY = (lineNumber == 1 && tokens.isEmpty) ? _selfFrame.size.height: (tokenPosition.y + baseTokenHeight + _marginY!)
+        var positionY = (lineNumber == 1 && tokens.isEmpty) ? _selfFrame.size.height: (tokenPosition.y + baseTokenHeight + _marginY)
         _scrollView.contentSize = CGSize(width: _scrollView.frame.width, height: positionY)
         if positionY > maximumHeight {
             positionY = maximumHeight
@@ -457,20 +457,20 @@ open class KSTokenField: UITextField {
      */
     fileprivate func _layoutTokensHorizontally() -> CGPoint {
         let leftMargin = _leftViewRect().width
-        var tokenPosition = CGPoint(x: _marginX!, y: _marginY!)
+        var tokenPosition = CGPoint(x: _marginX, y: _marginY)
         
         for token: KSToken in tokens {
-            let tokenSize = KSUtils.getTokenRect(token: token, maxWidth: bounds.size.width, defaultFont: _font!, defaultInsets: _contentInset!, defaultImagePadding: _imagePadding!).size
+            let tokenSize = KSUtils.getTokenRect(token: token, maxWidth: bounds.size.width, defaultFont: _font, defaultInsets: _contentInset, defaultImagePadding: _imagePadding).size
             let tokenWidth = tokenSize.width
             let tokenHeight = tokenSize.height
             
             if ((token.superview) != nil) {
                 token.frame = CGRect(x: tokenPosition.x, y: tokenPosition.y, width: tokenWidth, height: tokenHeight)
-                tokenPosition.x += tokenWidth + _marginX!
+                tokenPosition.x += tokenWidth + _marginX
             }
         }
         
-        let offsetWidth = ((tokenPosition.x + _marginX! + _leftViewRect().width) > (frame.width - _minWidthForInput)) ? _minWidthForInput : 0
+        let offsetWidth = ((tokenPosition.x + _marginX + _leftViewRect().width) > (frame.width - _minWidthForInput)) ? _minWidthForInput : 0
         _scrollView.contentSize = CGSize(width: max(_scrollView.frame.width, tokenPosition.x + offsetWidth), height: frame.height)
         scrollViewScrollToEnd()
         
@@ -500,18 +500,38 @@ open class KSTokenField: UITextField {
         guard _setupCompleted else { return .zero }
         
         if tokens.isEmpty || _caretPoint == nil {
-            return CGRect(x: _leftViewRect().width + _marginX! + _bufferX!, y: _leftViewRect().origin.y, width: bounds.size.width-5, height: bounds.size.height)
+            return CGRect(
+                x: _leftViewRect().width + _marginX + _bufferX,
+                y: _leftViewRect().origin.y,
+                width: bounds.size.width - 5.0,
+                height: bounds.size.height
+            )
         }
         
         if !tokens.isEmpty && _state == .closed {
-            return CGRect(x: _leftViewRect().maxX + _marginX! + _bufferX!, y: _leftViewRect().origin.y, width: (frame.size.width - _caretPoint!.x - _marginX!), height: bounds.size.height)
+            return CGRect(
+                x: _leftViewRect().maxX + _marginX + _bufferX,
+                y: _leftViewRect().origin.y,
+                width: (frame.size.width - _caretPoint!.x - _marginX),
+                height: bounds.size.height
+            )
         }
         
-        return CGRect(x: _caretPoint!.x, y: floor((_caretPoint!.y - font!.lineHeight - (_marginY!))), width: (frame.size.width - _caretPoint!.x - _marginX!), height: bounds.size.height)
+        return CGRect(
+            x: _caretPoint!.x,
+            y: floor((_caretPoint!.y - font!.lineHeight - (_marginY))),
+            width: (frame.size.width - _caretPoint!.x - _marginX),
+            height: bounds.size.height
+        )
     }
     
     override open func leftViewRect(forBounds bounds: CGRect) -> CGRect {
-        return CGRect(x: _marginX!, y: (_selfFrame != nil) ? (_selfFrame!.height - _leftViewRect().height)*0.5: (bounds.height - _leftViewRect().height)*0.5, width: _leftViewRect().width, height: ceil(_leftViewRect().height))
+        return CGRect(
+            x: _marginX,
+            y: (_selfFrame != nil) ? (_selfFrame!.height - _leftViewRect().height) * 0.5 : (bounds.height - _leftViewRect().height) * 0.5,
+            width: _leftViewRect().width,
+            height: ceil(_leftViewRect().height)
+        )
     }
     
     override open func textRect(forBounds bounds: CGRect) -> CGRect {
@@ -556,7 +576,7 @@ open class KSTokenField: UITextField {
                 label = leftlabel
             } else {
                 label = UILabel(frame: .zero)
-                label.frame.origin.x += _marginX!
+                label.frame.origin.x += _marginX
                 leftViewMode = .always
             }
             label.text = text
@@ -591,11 +611,11 @@ open class KSTokenField: UITextField {
             } else {
                 var title = KSTextEmpty
                 for token: KSToken in tokens {
-                    title += "\(token.title)\(_separatorText!)"
+                    title += "\(token.title)\(_separatorText)"
                 }
                 
                 if !title.isEmpty {
-                    title = String(title[..<title.index(title.endIndex, offsetBy: -_separatorText!.count)])
+                    title = String(title[..<title.index(title.endIndex, offsetBy: -_separatorText.count)])
                 }
                 
                 let width = KSUtils.widthOfString(title, font: font!)
@@ -611,25 +631,32 @@ open class KSTokenField: UITextField {
     }
     
     fileprivate func _updatePlaceHolderVisibility() {
-        if tokens.isEmpty && (text == KSTextEmpty || text!.isEmpty) {
-            _placeholderLabel?.text = _placeholderValue!
-            _placeholderLabel?.sizeToFit()
-            _placeholderLabel?.isHidden = false
+        guard let _placeholderLabel else { return }
+        if tokens.isEmpty && (text == KSTextEmpty || (text?.isEmpty == true)) {
+            _placeholderLabel.text = _placeholderValue!
+            _placeholderLabel.sizeToFit()
+            _placeholderLabel.isHidden = false
             
         } else {
-            _placeholderLabel?.isHidden = true
+            _placeholderLabel.isHidden = true
         }
     }
     
     fileprivate func _initPlaceholderLabel() {
-        let xPos = _marginX!
-        if _placeholderLabel == nil {
-            _placeholderLabel = UILabel(frame: CGRect(x: xPos, y: leftView!.frame.origin.y, width: _selfFrame!.width - xPos - _leftViewRect().size.width, height: _leftViewRect().size.height))
-            _placeholderLabel?.textColor = placeHolderColor
-            _placeholderLabel?.font = _font
-            _scrollView.addSubview(_placeholderLabel!)
+        let xPos = _marginX
+        if let _placeholderLabel {
+            _placeholderLabel.frame.origin.x = xPos
         } else {
-            _placeholderLabel?.frame.origin.x = xPos
+            let newPlaceholderLabel = UILabel(frame: CGRect(
+                x: xPos,
+                y: leftView!.frame.origin.y,
+                width: _selfFrame!.width - xPos - _leftViewRect().size.width,
+                height: _leftViewRect().size.height
+            ))
+            newPlaceholderLabel.textColor = placeHolderColor
+            newPlaceholderLabel.font = _font
+            _placeholderLabel = newPlaceholderLabel
+            _scrollView.addSubview(newPlaceholderLabel)
         }
     }
     
@@ -637,13 +664,10 @@ open class KSTokenField: UITextField {
     //MARK: - Token Gestures
     //__________________________________________________________________________________
     //
-    func isSelectedToken(_ token: KSToken) -> Bool {
-        if token.isEqual(selectedToken) {
-            return true
-        }
-        return false
-    }
     
+    func isSelectedToken(_ token: KSToken) -> Bool {
+        return token.isEqual(selectedToken)
+    }
     
     func deselectSelectedToken() {
         selectedToken?.isSelected = false
@@ -666,18 +690,18 @@ open class KSTokenField: UITextField {
     }
     
     @objc func tokenTouchDown(_ token: KSToken, forEvent event: UIEvent) {
-        if selectedToken != nil {
-            selectedToken?.isSelected = false
-            selectedToken = nil
-        }
+        guard selectedToken != nil else { return }
+        selectedToken?.isSelected = false
+        selectedToken = nil
     }
     
     @objc func tokenTouchUpInside(_ token: KSToken, forEvent event: UIEvent) {
         selectToken(token)
-        let touches: Set<UITouch>? = event.touches(for: token)
-        let touch: UITouch? = touches?.first
-        if let touchPoint: CGPoint = touch?.location(in: token) {
-            let isTouchedImage = token.isTouchingImage(touchPoints: [touchPoint])
+        
+        if let touches: Set<UITouch> = event.touches(for: token) {
+            let touchPoints = touches.map { $0.location(in: token) }
+            
+            let isTouchedImage = token.isTouchingImage(touchPoints: touchPoints)
             if isTouchedImage {
                 tokenFieldDelegate?.tokenFieldDidClickOnTokenImage?(token)
             }
@@ -739,6 +763,7 @@ open class KSTokenField: UITextField {
 //__________________________________________________________________________________
 //
 extension KSTokenField : UIScrollViewDelegate {
+    
     public func scrollViewWillBeginDragging(_ scrollView: UIScrollView) {
         _scrollPoint = scrollView.contentOffset
     }
@@ -758,9 +783,9 @@ extension KSTokenField : UIScrollViewDelegate {
     func updateCaretVisiblity(_ aScrollView: UIScrollView) {
         switch _direction {
         case .vertical:
-            let scrollViewHeight = aScrollView.frame.size.height;
-            let scrollContentSizeHeight = aScrollView.contentSize.height;
-            let scrollOffset = aScrollView.contentOffset.y;
+            let scrollViewHeight = aScrollView.frame.size.height
+            let scrollContentSizeHeight = aScrollView.contentSize.height
+            let scrollOffset = aScrollView.contentOffset.y
             
             if (scrollOffset + scrollViewHeight < scrollContentSizeHeight - 10) {
                 hideCaret()
@@ -770,9 +795,9 @@ extension KSTokenField : UIScrollViewDelegate {
             }
             
         case .horizontal:
-            let scrollViewWidth = aScrollView.frame.size.width;
-            let scrollContentSizeWidth = aScrollView.contentSize.width;
-            let scrollOffset = aScrollView.contentOffset.x;
+            let scrollViewWidth = aScrollView.frame.size.width
+            let scrollContentSizeWidth = aScrollView.contentSize.width
+            let scrollOffset = aScrollView.contentOffset.x
             
             if (scrollOffset + scrollViewWidth < scrollContentSizeWidth - 10) {
                 hideCaret()
@@ -790,11 +815,12 @@ extension KSTokenField : UIScrollViewDelegate {
     func showCaret() {
         tintColor = _cursorColor
     }
+    
 }
 
 extension KSTokenField: KSToken.KSTokenGlobalConfig {
-    func tokenFont() -> UIFont? { _font }
-    func contentInset() -> UIEdgeInsets? { _contentInset }
-    func imagePadding() -> CGFloat? { _imagePadding }
-    func imagePlacement() -> KSTokenImagePlacement? { _imagePlacement }
+    func tokenFont() -> UIFont { _font }
+    func contentInset() -> UIEdgeInsets { _contentInset }
+    func imagePadding() -> CGFloat { _imagePadding }
+    func imagePlacement() -> KSTokenImagePlacement { _imagePlacement }
 }
