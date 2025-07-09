@@ -10,6 +10,27 @@ Click [here](https://appetize.io/app/0kzy34tyg761punebrcc1x556w) for Live Previe
 ### Horizontal
 ![gif2](https://raw.githubusercontent.com/khawars/KSTokenView/screenshots/screenshots/gif2.gif)
 
+### Token with image
+
+![Token with image left](Assets/token_with_image_left.jpg)
+![Token with image right](token_with_image_right.jpg)
+
+Token image preferences:
+```swift
+    let token: KSToken = KSToken(title: names[i], image: tokenImage)
+    token.imagePlacement = .left
+    token.imageSizeMode = .fontBased(insets: .zero)
+    token.imagePadding = 2
+    token.contentInset = UIEdgeInsets(top: 2, left: 8, bottom: 2, right: 8)
+    tokenView.addToken(token)
+```
+Handling click on icon by `KSTokenViewDelegate`:
+```swift
+    func tokenView(_ tokenView: KSTokenView, didClickOnTokenImage token: KSToken) {
+        tokenView.deleteToken(token)
+    }
+```
+
 ### Screenshots
 [![iphone1](https://raw.githubusercontent.com/khawars/KSTokenView/screenshots/screenshots/iphone1-thumb.png)](https://raw.githubusercontent.com/khawars/KSTokenView/screenshots/screenshots/iphone1.png)
 [![iphone2](https://raw.githubusercontent.com/khawars/KSTokenView/screenshots/screenshots/iphone2-thumb.png)](https://raw.githubusercontent.com/khawars/KSTokenView/screenshots/screenshots/iphone2.png)
@@ -18,25 +39,17 @@ Click [here](https://appetize.io/app/0kzy34tyg761punebrcc1x556w) for Live Previe
 
 ## Requirements
 
-- iOS 9 and above.
-- Xcode 8.1 and above
-- Swift 4 and above
-**(For Swift 2.x use branch develop/swift2.3)**
-**(For Swift 3.x use branch develop/swift3)**
-
+- iOS 13 and above.
+- Swift 5 and above
 
 ## Adding KSTokenView to your project
 
-### METHOD 1: (CocoaPods only for iOS 10.0 and above)
+### METHOD 1: CocoaPods
 Add a pod entry for `KSTokenView` to your Podfile
 
 ```ruby
-source 'https://github.com/CocoaPods/Specs.git'
-platform :ios, '9.0'
-use_frameworks!
-
 target '<Your Target Name>' do
-    pod 'KSTokenView', '~> 5.0'
+    pod 'KSTokenView', :git => 'https://github.com/Splash04/KSTokenView.git'
 end
 ``` 
 
@@ -46,7 +59,30 @@ Then, run the following command:
 $ pod install
 ```
 
-### MEHTOD 2: (Source files)
+### METHOD 2: CocoaPods
+Add a pod entry for `KSTokenView` to your Podfile
+
+```ruby
+target '<Your Target Name>' do
+    pod 'KSTokenView', :git => 'https://github.com/Splash04/KSTokenView.git'
+end
+``` 
+
+### METHOD 2: Swift Package Manager (Package.swift file)
+1. Include the `KSTokenView` package in your list of dependencies:
+```ruby
+dependencies: [
+    .package(url: "https://github.com/Splash04/KSTokenView.git", .upToNextMajor(from: "6.0.0"))
+],
+``` 
+
+### METHOD 3: Swift Package Manager (Xcode project)
+1. In Xcode, navigate to File > Add Packages....
+2. In the dialog box that appears, paste the URL of the BMXSDK repository (https://github.com/Splash04/KSTokenView.git) into the search bar. Wait for the `KSTokenView` package to appear in the search results.
+3. Choose the desired version of the `KSTokenView` package, then click Add Package.
+4. Finally, click Add Package to add the selected packages to your project.
+
+### MEHTOD 4: (Source files)
 Alternatively, you can directly add all source files under `KSTokenView` to your project.
 
 1. Download the [latest code version](https://github.com/khawars/KSTokenView/archive/master.zip) or add the repository as a git submodule to your git-tracked project.
