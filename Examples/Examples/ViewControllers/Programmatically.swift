@@ -24,10 +24,21 @@
 
 import UIKit
 
+extension UIColor {
+    func image(_ size: CGSize = CGSize(width: 1, height: 1)) -> UIImage {
+        return UIGraphicsImageRenderer(size: size).image { rendererContext in
+            self.setFill()
+            rendererContext.fill(CGRect(origin: .zero, size: size))
+        }
+    }
+}
+
 class Programmatically: UIViewController {
     let names = List.names()
     var tokenView: KSTokenView = KSTokenView(frame: .zero)
     @IBOutlet weak var shouldChangeSwitch: UISwitch!
+//    let tokenImage = UIColor.yellow.image(CGSize(width: 15, height: 15))
+    let tokenImage = UIImage(systemName: "xmark.square")?.withTintColor(.white, renderingMode: .alwaysTemplate)
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -39,14 +50,14 @@ class Programmatically: UIViewController {
         tokenView.style = .squared
         view.addSubview(tokenView)
         for i in 0...20 {
-            let token: KSToken = KSToken(title: names[i])
+            let token: KSToken = KSToken(title: names[i], image: tokenImage)
             tokenView.addToken(token)
         }
     }
     
     @IBAction func addToken(sender: AnyObject) {
         let title = names[Int(arc4random_uniform(UInt32(names.count)))] as String
-        let token = KSToken(title: title, object: title as AnyObject?)
+        let token = KSToken(title: title, image: tokenImage, object: title as AnyObject?)
         
         // Token background color
         var red = CGFloat(Float(arc4random()) / Float(UINT32_MAX))
@@ -102,6 +113,10 @@ extension Programmatically: KSTokenViewDelegate {
             shouldAddToken = false
         }
         return shouldAddToken
+    }
+    
+    func tokenView(_ tokenView: KSTokenView, didClickOnTokenImage token: KSToken) {
+        tokenView.deleteToken(token)
     }
     
 }

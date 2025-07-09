@@ -27,38 +27,60 @@ import UIKit
 let KSTextEmpty = "\u{200B}"
 
 class KSUtils : NSObject {
-   
-   class func getRect(_ str: NSString, width: CGFloat, height: CGFloat, font: UIFont) -> CGRect {
-      let rectangleStyle = NSMutableParagraphStyle.default.mutableCopy() as! NSMutableParagraphStyle
-      rectangleStyle.alignment = NSTextAlignment.center
-      let rectangleFontAttributes = [NSAttributedString.Key.font: font, NSAttributedString.Key.paragraphStyle: rectangleStyle]
-      return str.boundingRect(with: CGSize(width: width, height: height), options: NSStringDrawingOptions.usesLineFragmentOrigin, attributes: rectangleFontAttributes, context: nil)
-   }
-   
-   class func getRect(_ str: NSString, width: CGFloat, font: UIFont) -> CGRect {
-      let rectangleStyle = NSMutableParagraphStyle.default.mutableCopy() as! NSMutableParagraphStyle
-      rectangleStyle.alignment = NSTextAlignment.center
-      let rectangleFontAttributes = [NSAttributedString.Key.font: font, NSAttributedString.Key.paragraphStyle: rectangleStyle]
-      return str.boundingRect(with: CGSize(width: width, height: CGFloat(MAXFLOAT)), options: NSStringDrawingOptions.usesLineFragmentOrigin, attributes: rectangleFontAttributes, context: nil)
-   }
-   
-   class func widthOfString(_ str: String, font: UIFont) -> CGFloat {
-      let attrs = [NSAttributedString.Key.font: font]
-      let attributedString = NSMutableAttributedString(string:str, attributes:attrs)
-      return attributedString.size().width
-   }
-   
+    
+    class func getTitleRect(_ str: NSString, width: CGFloat, height: CGFloat, font: UIFont) -> CGRect {
+        let rectangleStyle = NSMutableParagraphStyle.default.mutableCopy() as! NSMutableParagraphStyle
+        rectangleStyle.alignment = NSTextAlignment.center
+        let rectangleFontAttributes = [NSAttributedString.Key.font: font, NSAttributedString.Key.paragraphStyle: rectangleStyle]
+        return str.boundingRect(with: CGSize(width: width, height: height), options: NSStringDrawingOptions.usesLineFragmentOrigin, attributes: rectangleFontAttributes, context: nil)
+    }
+    
+    class func getTokenRect(token: KSToken, maxWidth: CGFloat, defaultFont: UIFont, defaultInsets: UIEdgeInsets, defaultImagePadding: CGFloat) -> CGRect {
+        let font = token.getDisplayFont(defaultTextFont: defaultFont)
+        let contentInset = token.getContentInset(defaultInsets: defaultInsets)
+        
+        let imageWithPaddingWidth: CGFloat
+        if token.image != nil {
+            let imageWidth = ceil(font.lineHeight)
+            let _imagePadding = token.getImagePadding(defaultPadding: defaultImagePadding)
+            imageWithPaddingWidth = imageWidth + _imagePadding
+        } else {
+            imageWithPaddingWidth = 0
+        }
+        
+        let tokenHeight = getTokenHeight(font: font, insets: contentInset)
+        let maxTextWidth = maxWidth - imageWithPaddingWidth - contentInset.right - contentInset.left
+        let textRect = getTitleRect(token.title as NSString, width: maxTextWidth, height: CGFloat(MAXFLOAT), font: font)
+        let calculatedTokenWidth = ceil(textRect.size.width + imageWithPaddingWidth + contentInset.right + contentInset.right)
+        return CGRect(
+            x: textRect.origin.x,
+            y: textRect.origin.y,
+            width: min(calculatedTokenWidth, maxWidth),
+            height: max(textRect.size.height, tokenHeight)
+        )
+    }
+    
+    class func getTokenHeight(font: UIFont, insets: UIEdgeInsets) -> CGFloat {
+        ceil(font.lineHeight + insets.top + insets.bottom)
+    }
+    
+    class func widthOfString(_ str: String, font: UIFont) -> CGFloat {
+        let attrs = [NSAttributedString.Key.font: font]
+        let attributedString = NSMutableAttributedString(string:str, attributes:attrs)
+        return attributedString.size().width
+    }
+    
 }
 
 extension UIColor {
-   func darkendColor(_ darkRatio: CGFloat) -> UIColor {
-      var h: CGFloat = 0.0, s: CGFloat = 0.0, b: CGFloat = 0.0, a: CGFloat = 0.0
-      if (getHue(&h, saturation: &s, brightness: &b, alpha: &a)) {
-         return UIColor(hue: h, saturation: s, brightness: b*darkRatio, alpha: a)
-      } else {
-         return self
-      }
-   }
+    func darkendColor(_ darkRatio: CGFloat) -> UIColor {
+        var h: CGFloat = 0.0, s: CGFloat = 0.0, b: CGFloat = 0.0, a: CGFloat = 0.0
+        if (getHue(&h, saturation: &s, brightness: &b, alpha: &a)) {
+            return UIColor(hue: h, saturation: s, brightness: b*darkRatio, alpha: a)
+        } else {
+            return self
+        }
+    }
 }
 
 

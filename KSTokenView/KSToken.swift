@@ -23,169 +23,344 @@
 //  IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 import UIKit
-
+import AVFoundation
 
 //MARK: - KSToken
 //__________________________________________________________________________________
 //
 open class KSToken : UIControl {
-   
-   //MARK: - Public Properties
-   //__________________________________________________________________________________
-   //
-   
-   /// retuns title as description
-   override open var description : String {
-      get {
-         return title
-      }
-   }
-   
-   /// default is ""
-   open var title = ""
-   
-   /// default is nil. Any Custom object.
-   open var object: AnyObject?
-   
-   /// default is false. If set to true, token can not be deleted
-   open var sticky = false
-   
-   /// Token Title color
-   open var tokenTextColor = UIColor(red: 255/255, green: 255/255, blue: 255/255, alpha: 1)
-   
-   /// Token background color
-   open var tokenBackgroundColor = UIColor(red: 50/255, green: 50/255, blue: 255/255, alpha: 1)
-   
-   /// Token title color in selected state
-   open var tokenTextHighlightedColor: UIColor?
-   
-   /// Token backgrould color in selected state
-   open var tokenBackgroundHighlightedColor: UIColor?
-   
-   /// Token background color in selected state. It doesn't have effect if 'tokenBackgroundHighlightedColor' is set
-   open var darkRatio: CGFloat = 0.75
-   
-   /// Token border width
-   open var borderWidth: CGFloat = 0.0
-   
-   ///Token border color
-   open var borderColor: UIColor = UIColor.black
-   
-   /// default is 200. Maximum width of token. After maximum limit is reached title is truncated at end with '...'
-   fileprivate var _maxWidth: CGFloat? = 200
-   open var maxWidth: CGFloat {
-      get{
-         return _maxWidth!
-      }
-      set (newWidth) {
-         if (_maxWidth != newWidth) {
-            _maxWidth = newWidth
-            sizeToFit()
+    
+    protocol KSTokenGlobalConfig: AnyObject {
+        func tokenFont() -> UIFont?
+        func contentInset() -> UIEdgeInsets?
+        func imagePadding() -> CGFloat?
+        func imagePlacement() -> KSTokenImagePlacement?
+    }
+    
+    //MARK: - Public Properties
+    //__________________________________________________________________________________
+    //
+    
+    /// retuns title as description
+    override open var description : String {
+        get {
+            return title
+        }
+    }
+    
+    /// default is ""
+    open var title = ""
+    
+    /// default is nil. Any Custom object.
+    open var object: AnyObject?
+    
+    /// default is false. If set to true, token can not be deleted
+    open var sticky = false
+    
+    /// default is 15
+     open var tokenCornerRadius:CGFloat = 15.0
+    
+    /// default is nil. So it using font from Text Input
+    var tokenTextFont: UIFont? = nil
+    
+    /// Token Title color
+    open var tokenTextColor = UIColor(red: 255/255, green: 255/255, blue: 255/255, alpha: 1)
+    
+    /// Token background color
+    open var tokenBackgroundColor = UIColor(red: 50/255, green: 50/255, blue: 255/255, alpha: 1)
+    
+    /// Token title color in selected state
+    open var tokenTextHighlightedColor: UIColor?
+    
+    /// Token backgrould color in selected state
+    open var tokenBackgroundHighlightedColor: UIColor?
+    
+    /// Token background color in selected state. It doesn't have effect if 'tokenBackgroundHighlightedColor' is set
+    open var darkRatio: CGFloat = 0.75
+    
+    /// Token border width
+    open var borderWidth: CGFloat = 0.0
+    
+    ///Token border color
+    open var borderColor: UIColor = UIColor.black
+    
+    ///Token icon
+    open var image: UIImage?
+    
+    ///Token icon position
+    open var imagePlacement: KSTokenImagePlacement?
+    
+    ///Token icon EdgeInsets
+    open var imageEdgeInsets = UIEdgeInsets(top: 0, left: 0, bottom: 0, right: 0)
+    
+    /// Padding between image and title
+    open var imagePadding: CGFloat?
+    
+    /// Token content insets
+    open var contentInset: UIEdgeInsets?
+    
+    /// default is 200. Maximum width of token. After maximum limit is reached title is truncated at end with '...'
+    fileprivate var _maxWidth: CGFloat? = 200
+    open var maxWidth: CGFloat {
+        get {
+            return _maxWidth!
+        }
+        set (newWidth) {
+            if (_maxWidth != newWidth) {
+                _maxWidth = newWidth
+                sizeToFit()
+                setNeedsDisplay()
+            }
+        }
+    }
+    
+    weak var globalConfigDelegate: KSTokenGlobalConfig?
+    
+    /// returns true if token is selected
+    override open var isSelected: Bool {
+        didSet (newValue) {
             setNeedsDisplay()
-         }
-      }
-   }
-   
-   /// returns true if token is selected
-   override open var isSelected: Bool {
-      didSet (newValue) {
-         setNeedsDisplay()
-      }
-   }
-   
-   //MARK: - Constructors
-   //__________________________________________________________________________________
-   //
-   convenience required public init(coder aDecoder: NSCoder) {
-      self.init(title: "")
-   }
-   
-   convenience public init(title: String) {
-      self.init(title: title, object: title as AnyObject?);
-   }
-   
-   public init(title: String, object: AnyObject?) {
-      self.title = title
-      self.object = object
-      super.init(frame: CGRect.zero)
-      backgroundColor = UIColor.clear
-   }
-   
-   //MARK: - Drawing code
-   //__________________________________________________________________________________
-   //
-   override open func draw(_ rect: CGRect) {
-      //// General Declarations
-      let context = UIGraphicsGetCurrentContext()
-      
-      //// Rectangle Drawing
-      
-      // fill background
-      let rectanglePath = UIBezierPath(roundedRect: rect, cornerRadius: 15)
-      
-      var textColor: UIColor
-      var backgroundColor: UIColor
-      
-      if (isSelected) {
-         if (tokenBackgroundHighlightedColor != nil) {
-            backgroundColor = tokenBackgroundHighlightedColor!
-         } else {
-            backgroundColor = tokenBackgroundColor.darkendColor(darkRatio)
-         }
-         
-         if (tokenTextHighlightedColor != nil) {
-            textColor = tokenTextHighlightedColor!
-         } else {
+        }
+    }
+    
+    //MARK: - Constructors
+    //__________________________________________________________________________________
+    //
+    convenience required public init(coder aDecoder: NSCoder) {
+        self.init(title: "")
+    }
+    
+    convenience public init(title: String) {
+        self.init(title: title, image: nil, object: title as AnyObject?);
+    }
+    
+    convenience public init(title: String, object: AnyObject?) {
+        self.init(title: title, image: nil, object: object);
+    }
+    convenience public init(title: String, image: UIImage?) {
+        self.init(title: title, image: image, object: title as AnyObject?);
+    }
+    
+    public init(title: String, image: UIImage?, object: AnyObject?) {
+        self.title = title
+        self.image = image
+        self.object = object
+        super.init(frame: CGRect.zero)
+        backgroundColor = UIColor.clear
+    }
+    
+    //MARK: - Drawing code
+    //__________________________________________________________________________________
+    //
+    override open func draw(_ rect: CGRect) {
+        //// General Declarations
+        let context = UIGraphicsGetCurrentContext()
+        
+        //// Rectangle Drawing
+        
+        // fill background
+        let rectanglePath = UIBezierPath(roundedRect: rect, cornerRadius: tokenCornerRadius)
+        
+        var textColor: UIColor
+        var backgroundColor: UIColor
+        
+        if isSelected {
+            if tokenBackgroundHighlightedColor != nil {
+                backgroundColor = tokenBackgroundHighlightedColor!
+            } else {
+                backgroundColor = tokenBackgroundColor.darkendColor(darkRatio)
+            }
+            
+            if let tokenTextHighlightedColor {
+                textColor = tokenTextHighlightedColor
+            } else {
+                textColor = tokenTextColor
+            }
+        } else {
+            backgroundColor = tokenBackgroundColor
             textColor = tokenTextColor
-         }
-         
-      } else {
-         backgroundColor = tokenBackgroundColor
-         textColor = tokenTextColor
-      }
-      
-      backgroundColor.setFill()
-      rectanglePath.fill()
-      
-      var paddingX: CGFloat = 0.0
-      var font = UIFont.systemFont(ofSize: 16)
-      var tokenField: KSTokenField? {
-         return superview! as? KSTokenField
-      }
-      if ((tokenField) != nil) {
-         paddingX = tokenField!.paddingX()!
-         font = tokenField!.tokenFont()!
-      }
-      
-      // Text
-      let rectangleTextContent = title
-      let rectangleStyle = NSMutableParagraphStyle.default.mutableCopy() as! NSMutableParagraphStyle
-      rectangleStyle.lineBreakMode = NSLineBreakMode.byTruncatingTail
-      rectangleStyle.alignment = NSTextAlignment.center
-      let rectangleFontAttributes = [NSAttributedString.Key.font: font, NSAttributedString.Key.foregroundColor: textColor, NSAttributedString.Key.paragraphStyle: rectangleStyle] as [NSAttributedString.Key : Any]
-      
-      let maxDrawableHeight = max(rect.height , font.lineHeight)
-      let textHeight: CGFloat = KSUtils.getRect(rectangleTextContent as NSString, width: rect.width, height: maxDrawableHeight , font: font).size.height
-      
-      let textRect = CGRect(x: rect.minX + paddingX, y: rect.minY + (maxDrawableHeight - textHeight) / 2, width: min(maxWidth, rect.width) - (paddingX*2), height: maxDrawableHeight)
-      
-      rectangleTextContent.draw(in: textRect, withAttributes: rectangleFontAttributes)
-      
-      #if swift(>=2.3)
-         context!.saveGState()
-         context!.clip(to: rect)
-         context!.restoreGState()
-      #else
-         context.saveGState()
-         context.clip(to: rect)
-         context.restoreGState()
-      #endif
-      
-      // Border
-      if (borderWidth > 0.0 && borderColor != UIColor.clear) {
-         borderColor.setStroke()
-         rectanglePath.lineWidth = borderWidth
-         rectanglePath.stroke()
-      }
-   }
+        }
+        
+        backgroundColor.setFill()
+        rectanglePath.fill()
+        
+        let _font: UIFont = getDisplayFont()
+        let _contentInsets = getContentInset()
+        let _imagePlacement = getImagePlacement()
+        
+        let maxDrawableHeight = max(rect.height, _font.lineHeight)
+        
+        // Calculate icon size
+        let imageSize: CGSize
+        let imageInsets: UIEdgeInsets
+        let baseImageHeight: CGFloat
+        let paddingBetweenTitleAndImage: CGFloat
+        if image != nil {
+            baseImageHeight = ceil(_font.lineHeight)
+            imageSize = Self.getImageSize(baseHeight: baseImageHeight, imageEdgeInsets: imageEdgeInsets)
+            switch _imagePlacement {
+            case .left:
+                imageInsets = UIEdgeInsets(top: 0, left: baseImageHeight, bottom: 0, right: 0)
+            case .right:
+                imageInsets = UIEdgeInsets(top: 0, left: 0, bottom: 0, right: baseImageHeight)
+            }
+            paddingBetweenTitleAndImage = getImagePadding()
+        } else {
+            baseImageHeight = 0
+            paddingBetweenTitleAndImage = 0
+            imageSize = .zero
+            imageInsets = .zero
+        }
+
+        // Text
+        let rectangleTextContent = title
+        let rectangleStyle = NSMutableParagraphStyle.default.mutableCopy() as! NSMutableParagraphStyle
+        rectangleStyle.lineBreakMode = NSLineBreakMode.byTruncatingTail
+        rectangleStyle.alignment = NSTextAlignment.center
+        let rectangleFontAttributes = [NSAttributedString.Key.font: _font, NSAttributedString.Key.foregroundColor: textColor, NSAttributedString.Key.paragraphStyle: rectangleStyle] as [NSAttributedString.Key : Any]
+        let textDrawableWidth = ceil(rect.width - baseImageHeight - _contentInsets.left - _contentInsets.right - paddingBetweenTitleAndImage)
+        
+        let textHeight: CGFloat = KSUtils.getTitleRect(rectangleTextContent as NSString, width: textDrawableWidth, height: maxDrawableHeight , font: _font).size.height
+        let additionalImagePadding = imageInsets.left > 0 ? paddingBetweenTitleAndImage : 0
+        let textWidth = min(maxWidth - _contentInsets.left - _contentInsets.right, textDrawableWidth)
+        let textRect = CGRect(
+            x: rect.minX + _contentInsets.left + imageInsets.left + additionalImagePadding,
+            y: rect.minY + (maxDrawableHeight - textHeight) / 2,
+            width: textWidth,
+            height: maxDrawableHeight
+        )
+        
+        rectangleTextContent.draw(in: textRect, withAttributes: rectangleFontAttributes)
+        
+        // Draw icon
+        if let image {
+            let imagePoint: CGPoint
+            switch _imagePlacement {
+            case .left:
+                imagePoint = CGPoint(
+                    x: rect.minX + _contentInsets.left + imageEdgeInsets.left,
+                    y: rect.minY + _contentInsets.top + imageEdgeInsets.top
+                )
+            case .right:
+                imagePoint = CGPoint(
+                    x: rect.minX + _contentInsets.left + textWidth + paddingBetweenTitleAndImage + imageEdgeInsets.left,
+                    y: rect.minY + _contentInsets.top + imageEdgeInsets.top
+                )
+            }
+            
+            let imageRect = CGRect(origin: imagePoint, size: imageSize)
+            let aspectFitRect = AVMakeRect(aspectRatio: image.size, insideRect: imageRect)
+            image.draw(in: aspectFitRect)
+        }
+        
+#if swift(>=2.3)
+        if let context {
+            context.saveGState()
+            context.clip(to: rect)
+            context.restoreGState()
+        }
+#else
+        context.saveGState()
+        context.clip(to: rect)
+        context.restoreGState()
+#endif
+        
+        // Border
+        if borderWidth > 0.0 && borderColor != UIColor.clear {
+            borderColor.setStroke()
+            rectanglePath.lineWidth = borderWidth
+            rectanglePath.stroke()
+        }
+    }
+    
+    func isTouchingImage(touchPoints: [CGPoint]) -> Bool {
+        guard image != nil, !touchPoints.isEmpty else { return false }
+        
+        let _font: UIFont = getDisplayFont()
+        let _imagePlacement = getImagePlacement()
+        let _contentInsets = getContentInset()
+        let baseImageHeight = ceil(_font.lineHeight)
+        let imageSize = Self.getImageSize(baseHeight: baseImageHeight, imageEdgeInsets: imageEdgeInsets)
+        
+        switch _imagePlacement {
+        case .left:
+            let imageMaxX = bounds.minX + _contentInsets.left + imageEdgeInsets.left + imageSize.width
+            for point in touchPoints {
+                if point.x <= imageMaxX {
+                    return true
+                }
+            }
+        case .right:
+            let imageMinX = bounds.maxX - _contentInsets.right - imageEdgeInsets.right - imageSize.width
+            for point in touchPoints {
+                if point.x >= imageMinX {
+                    return true
+                }
+            }
+        }
+        return false
+    }
+    
+    func getDisplayFont(defaultTextFont: UIFont = Constants.Defaults.font) -> UIFont {
+        if let tokenTextFont {
+            return tokenTextFont
+        } else if let tokenFieldFont = globalConfigDelegate?.tokenFont() {
+            return tokenFieldFont
+        } else {
+            return defaultTextFont
+        }
+    }
+    
+    func getContentInset(defaultInsets: UIEdgeInsets = Constants.Defaults.contentInsets) -> UIEdgeInsets {
+        if let contentInset {
+            return contentInset
+        } else if let tokenFieldInset = globalConfigDelegate?.contentInset() {
+            return tokenFieldInset
+        } else {
+            return defaultInsets
+        }
+    }
+    
+    func getImagePadding(defaultPadding: CGFloat = Constants.Defaults.imagePadding) -> CGFloat {
+        if let imagePadding {
+            return imagePadding
+        } else if let tokenImagePadding = globalConfigDelegate?.imagePadding() {
+            return tokenImagePadding
+        } else {
+            return defaultPadding
+        }
+    }
+    
+    func getImagePlacement(defaultPlacement: KSTokenImagePlacement = Constants.Defaults.imagePlacement) -> KSTokenImagePlacement {
+        if let imagePlacement {
+            return imagePlacement
+        } else if let tokenImagePlacement = globalConfigDelegate?.imagePlacement() {
+            return tokenImagePlacement
+        } else {
+            return defaultPlacement
+        }
+    }
+    
+    private static func getImageSize(baseHeight: CGFloat, imageEdgeInsets: UIEdgeInsets) -> CGSize {
+        let imageHeightInsets = imageEdgeInsets.top + imageEdgeInsets.bottom
+        let imageWidthWithInsets = imageEdgeInsets.left + imageEdgeInsets.right
+        return CGSize(
+            width: baseHeight - imageWidthWithInsets,
+            height: baseHeight - imageHeightInsets
+        ) // square icon with the same size like a text
+    }
+}
+
+//MARK: - Constants
+//__________________________________________________________________________________
+//
+
+public extension KSToken { enum Constants {} }
+public extension KSToken.Constants {
+    enum Defaults {
+        static let contentInsets: UIEdgeInsets = UIEdgeInsets(top: 2, left: 8, bottom: 2, right: 8)
+        static let imagePadding: CGFloat = 2
+        static let font = UIFont.systemFont(ofSize: 16)
+        static let imagePlacement: KSTokenImagePlacement = .right
+    }
 }
