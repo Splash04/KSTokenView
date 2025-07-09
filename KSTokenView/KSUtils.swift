@@ -38,10 +38,10 @@ class KSUtils : NSObject {
     class func getTokenRect(token: KSToken, maxWidth: CGFloat, defaultFont: UIFont, defaultInsets: UIEdgeInsets, defaultImagePadding: CGFloat) -> CGRect {
         let font = token.getDisplayFont(defaultTextFont: defaultFont)
         let contentInset = token.getContentInset(defaultInsets: defaultInsets)
-        
+        let fontLineHeight: CGFloat = ceil(font.lineHeight)
         let imageWithPaddingWidth: CGFloat
         if token.image != nil {
-            let imageWidth = ceil(font.lineHeight)
+            let imageWidth = fontLineHeight
             let _imagePadding = token.getImagePadding(defaultPadding: defaultImagePadding)
             imageWithPaddingWidth = imageWidth + _imagePadding
         } else {
@@ -51,12 +51,13 @@ class KSUtils : NSObject {
         let tokenHeight = getTokenHeight(font: font, insets: contentInset)
         let maxTextWidth = maxWidth - imageWithPaddingWidth - contentInset.right - contentInset.left
         let textRect = getTitleRect(token.title as NSString, width: maxTextWidth, height: CGFloat(MAXFLOAT), font: font)
+        let calculatedTextHeight = ceil(min(textRect.size.height, fontLineHeight))
         let calculatedTokenWidth = ceil(textRect.size.width + imageWithPaddingWidth + contentInset.right + contentInset.right)
         return CGRect(
             x: textRect.origin.x,
             y: textRect.origin.y,
             width: min(calculatedTokenWidth, maxWidth),
-            height: max(textRect.size.height, tokenHeight)
+            height: max(calculatedTextHeight, tokenHeight)
         )
     }
     
