@@ -84,14 +84,14 @@ open class KSToken : UIControl {
     ///Token border color
     open var borderColor: UIColor = UIColor.black
     
-    ///Token icon
+    ///Token image
     open var image: UIImage?
     
-    ///Token icon position
+    ///Token image position
     open var imagePlacement: KSTokenImagePlacement?
     
-    ///Token icon EdgeInsets
-    open var imageEdgeInsets = UIEdgeInsets(top: 0, left: 0, bottom: 0, right: 0)
+    ///Token image size behavior
+    open var imageSizeMode: KSTokenImageSizeMode = Constants.Defaults.imageSizeMode
     
     /// Padding between image and title
     open var imagePadding: CGFloat?
@@ -192,24 +192,27 @@ open class KSToken : UIControl {
         
         // Calculate icon size
         let imageSize: CGSize
-        let imageInsets: UIEdgeInsets
+        let imageInsetsForTextDrawing: UIEdgeInsets
         let baseImageHeight: CGFloat
         let paddingBetweenTitleAndImage: CGFloat
+        let imageEdgeInsets: UIEdgeInsets
         if image != nil {
             baseImageHeight = ceil(_font.lineHeight)
-            imageSize = Self.getImageSize(baseHeight: baseImageHeight, imageEdgeInsets: imageEdgeInsets)
+            imageSize = Self.getImageSize(baseHeight: baseImageHeight, imageSizeMode: imageSizeMode)
+            imageEdgeInsets = Self.getImageEdgeInsets(baseHeight: baseImageHeight, imageSizeMode: imageSizeMode)
             switch _imagePlacement {
             case .left:
-                imageInsets = UIEdgeInsets(top: 0, left: baseImageHeight, bottom: 0, right: 0)
+                imageInsetsForTextDrawing = UIEdgeInsets(top: 0, left: baseImageHeight, bottom: 0, right: 0)
             case .right:
-                imageInsets = UIEdgeInsets(top: 0, left: 0, bottom: 0, right: baseImageHeight)
+                imageInsetsForTextDrawing = UIEdgeInsets(top: 0, left: 0, bottom: 0, right: baseImageHeight)
             }
             paddingBetweenTitleAndImage = getImagePadding()
         } else {
             baseImageHeight = 0
             paddingBetweenTitleAndImage = 0
             imageSize = .zero
-            imageInsets = .zero
+            imageInsetsForTextDrawing = .zero
+            imageEdgeInsets = .zero
         }
 
         // Text
@@ -221,10 +224,10 @@ open class KSToken : UIControl {
         let textDrawableWidth = ceil(rect.width - baseImageHeight - _contentInsets.left - _contentInsets.right - paddingBetweenTitleAndImage)
         
         let textHeight: CGFloat = KSUtils.getTitleRect(rectangleTextContent as NSString, width: textDrawableWidth, height: maxDrawableHeight , font: _font).size.height
-        let additionalImagePadding = imageInsets.left > 0 ? paddingBetweenTitleAndImage : 0
+        let additionalImagePadding = imageInsetsForTextDrawing.left > 0 ? paddingBetweenTitleAndImage : 0
         let textWidth = min(maxWidth - _contentInsets.left - _contentInsets.right, textDrawableWidth)
         let textRect = CGRect(
-            x: rect.minX + _contentInsets.left + imageInsets.left + additionalImagePadding,
+            x: rect.minX + _contentInsets.left + imageInsetsForTextDrawing.left + additionalImagePadding,
             y: rect.minY + (maxDrawableHeight - textHeight) / 2,
             width: textWidth,
             height: maxDrawableHeight
@@ -280,7 +283,8 @@ open class KSToken : UIControl {
         let _imagePlacement = getImagePlacement()
         let _contentInsets = getContentInset()
         let baseImageHeight = ceil(_font.lineHeight)
-        let imageSize = Self.getImageSize(baseHeight: baseImageHeight, imageEdgeInsets: imageEdgeInsets)
+        let imageSize = Self.getImageSize(baseHeight: baseImageHeight, imageSizeMode: imageSizeMode)
+        let imageEdgeInsets = Self.getImageEdgeInsets(baseHeight: baseImageHeight, imageSizeMode: imageSizeMode)
         
         switch _imagePlacement {
         case .left:
@@ -341,13 +345,59 @@ open class KSToken : UIControl {
         }
     }
     
-    private static func getImageSize(baseHeight: CGFloat, imageEdgeInsets: UIEdgeInsets) -> CGSize {
-        let imageHeightInsets = imageEdgeInsets.top + imageEdgeInsets.bottom
-        let imageWidthWithInsets = imageEdgeInsets.left + imageEdgeInsets.right
-        return CGSize(
-            width: baseHeight - imageWidthWithInsets,
-            height: baseHeight - imageHeightInsets
-        ) // square icon with the same size like a text
+    private static func getImageSize(baseHeight: CGFloat, imageSizeMode: KSTokenImageSizeMode) -> CGSize {
+        switch imageSizeMode {
+        case .fixed(let size, _):
+            return CGSize(
+                width: min(baseHeight, size.width),
+                height: min(baseHeight, size.height)
+            )
+        case .fontBased(let imageEdgeInsets):
+            let imageHeightInsets = imageEdgeInsets.top + imageEdgeInsets.bottom
+            let imageWidthWithInsets = imageEdgeInsets.left + imageEdgeInsets.right
+            return CGSize(
+                width: baseHeight - imageWidthWithInsets,
+                height: baseHeight - imageHeightInsets
+            ) // square icon with the same size like a text
+        }
+    }
+    
+    private static func getImageEdgeInsets(baseHeight: CGFloat, imageSizeMode: KSTokenImageSizeMode) -> UIEdgeInsets {
+        switch imageSizeMode {
+        case .fixed(let size, let alignment):
+            let realImageSize = CGSize(
+                width: min(baseHeight, size.width),
+                height: min(baseHeight, size.height)
+            )
+            switch alignment {
+            case .top:
+                let horizontalOffset:CGFloat = (baseHeight - realImageSize.width) / 2.0
+                return UIEdgeInsets(top: 0, left: horizontalOffset, bottom: baseHeight - realImageSize.height, right: horizontalOffset)
+            case .left:
+                let verticalOffset:CGFloat = (baseHeight - realImageSize.height) / 2.0
+                return UIEdgeInsets(top: verticalOffset, left: 0, bottom: verticalOffset, right: baseHeight - realImageSize.width)
+            case .right:
+                let verticalOffset:CGFloat = (baseHeight - realImageSize.height) / 2.0
+                return UIEdgeInsets(top: verticalOffset, left: baseHeight - realImageSize.width, bottom: verticalOffset, right: 0)
+            case .center:
+                let verticalOffset:CGFloat = (baseHeight - realImageSize.height) / 2.0
+                let horizontalOffset:CGFloat = (baseHeight - realImageSize.width) / 2.0
+                return UIEdgeInsets(top: verticalOffset, left: horizontalOffset, bottom: verticalOffset, right: horizontalOffset)
+            case .bottom:
+                let horizontalOffset:CGFloat = (baseHeight - realImageSize.width) / 2.0
+                return UIEdgeInsets(top: baseHeight - realImageSize.height, left: horizontalOffset, bottom: 0, right: horizontalOffset)
+            case .topLeft:
+                return UIEdgeInsets(top: 0, left: 0, bottom: baseHeight - realImageSize.height, right: baseHeight - realImageSize.width)
+            case .topRight:
+                return UIEdgeInsets(top: 0, left: baseHeight - realImageSize.width, bottom: baseHeight - realImageSize.height, right: 0)
+            case .bottomLeft:
+                return UIEdgeInsets(top: baseHeight - realImageSize.height, left: 0, bottom: 0, right: baseHeight - realImageSize.width)
+            case .bottomRight:
+                return UIEdgeInsets(top: baseHeight - realImageSize.height, left: baseHeight - realImageSize.width, bottom: 0, right: 0)
+            }
+        case .fontBased(let imageEdgeInsets):
+            return imageEdgeInsets
+        }
     }
 }
 
@@ -362,5 +412,6 @@ public extension KSToken.Constants {
         static let imagePadding: CGFloat = 2
         static let font = UIFont.systemFont(ofSize: 16)
         static let imagePlacement: KSTokenImagePlacement = .right
+        static let imageSizeMode: KSTokenImageSizeMode = .fontBased(insets: .zero)
     }
 }

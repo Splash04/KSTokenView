@@ -40,6 +40,22 @@ import UIKit
     case right
 }
 
+public enum KSTokenImageAlignment: Equatable {
+    case top
+    case left
+    case right
+    case center
+    case bottom
+    case topLeft
+    case topRight
+    case bottomLeft
+    case bottomRight
+}
+
+public enum KSTokenImageSizeMode: Equatable {
+    case fixed(size: CGSize, alignment: KSTokenImageAlignment)
+    case fontBased(insets: UIEdgeInsets)
+}
 
 //MARK: - KSTokenViewDelegate
 //__________________________________________________________________________________
