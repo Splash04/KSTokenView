@@ -10,21 +10,10 @@ let package = Package(
     ],
     
     products: [
-        .library(
-            name: "KSTokenView",
-            targets: ["KSTokenView"]),
+        .library(name: "KSTokenView", targets: ["KSTokenView"])
     ],
     
-    dependencies: [
-    ],
     targets: [
-        .target(
-            name: "KSTokenView",
-            dependencies: []
-            path: "KSTokenView",
-            resources: [
-                .process("PrivacyInfo.xcprivacy")
-            ]
-        )
+        .target(name: "KSTokenView", path: "KSTokenView", resources: [.process("PrivacyInfo.xcprivacy")])
     ]
 )
