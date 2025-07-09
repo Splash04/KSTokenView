@@ -78,7 +78,7 @@ dependencies: [
 
 ### METHOD 3: Swift Package Manager (Xcode project)
 1. In Xcode, navigate to File > Add Packages....
-2. In the dialog box that appears, paste the URL of the BMXSDK repository (https://github.com/Splash04/KSTokenView.git) into the search bar. Wait for the `KSTokenView` package to appear in the search results.
+2. In the dialog box that appears, paste the URL of the `KSTokenView` repository (https://github.com/Splash04/KSTokenView.git) into the search bar. Wait for the `KSTokenView` package to appear in the search results.
 3. Choose the desired version of the `KSTokenView` package, then click Add Package.
 4. Finally, click Add Package to add the selected packages to your project.
 
