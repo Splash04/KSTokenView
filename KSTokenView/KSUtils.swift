@@ -39,6 +39,8 @@ class KSUtils : NSObject {
         let font = token.getDisplayFont(defaultTextFont: defaultFont)
         let contentInset = token.getContentInset(defaultInsets: defaultInsets)
         let fontLineHeight: CGFloat = ceil(font.lineHeight)
+        let tokenMaxWidth = token.maxWidth
+        let resultMaxWidth = min(tokenMaxWidth, maxWidth)
         let imageWithPaddingWidth: CGFloat
         if token.image != nil {
             let imageWidth = fontLineHeight
@@ -49,7 +51,7 @@ class KSUtils : NSObject {
         }
         
         let tokenHeight = getTokenHeight(font: font, insets: contentInset)
-        let maxTextWidth = maxWidth - imageWithPaddingWidth - contentInset.right - contentInset.left
+        let maxTextWidth = resultMaxWidth - imageWithPaddingWidth - contentInset.right - contentInset.left
         let textRect = getTitleRect(token.title as NSString, width: maxTextWidth, height: CGFloat(MAXFLOAT), font: font)
         let calculatedTextHeight = ceil(min(textRect.size.height, fontLineHeight))
         let calculatedTokenWidth = ceil(textRect.size.width + imageWithPaddingWidth + contentInset.right + contentInset.right)
