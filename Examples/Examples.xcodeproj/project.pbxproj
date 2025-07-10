@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		7833D9C72E2027A1002EBAD4 /* InactiveList.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7833D9C62E202793002EBAD4 /* InactiveList.swift */; };
 		C319926A1E603887007ED590 /* KSToken.swift in Sources */ = {isa = PBXBuildFile; fileRef = C31992661E603887007ED590 /* KSToken.swift */; };
 		C319926B1E603887007ED590 /* KSTokenField.swift in Sources */ = {isa = PBXBuildFile; fileRef = C31992671E603887007ED590 /* KSTokenField.swift */; };
 		C319926C1E603887007ED590 /* KSTokenView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C31992681E603887007ED590 /* KSTokenView.swift */; };
@@ -26,6 +27,7 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		7833D9C62E202793002EBAD4 /* InactiveList.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InactiveList.swift; sourceTree = "<group>"; };
 		C31992661E603887007ED590 /* KSToken.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = KSToken.swift; sourceTree = "<group>"; };
 		C31992671E603887007ED590 /* KSTokenField.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = KSTokenField.swift; sourceTree = "<group>"; };
 		C31992681E603887007ED590 /* KSTokenView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = KSTokenView.swift; sourceTree = "<group>"; };
@@ -109,6 +111,7 @@
 		C39BEBDB1E0037350069F952 /* ViewControllers */ = {
 			isa = PBXGroup;
 			children = (
+				7833D9C62E202793002EBAD4 /* InactiveList.swift */,
 				C39BEBE21E0037350069F952 /* ViewController.swift */,
 				C39BEBDC1E0037350069F952 /* Autolayout.swift */,
 				C39BEBDD1E0037350069F952 /* Horizontal.swift */,
@@ -204,6 +207,7 @@
 				C39BEBE81E0037350069F952 /* ViewController.swift in Sources */,
 				C319926A1E603887007ED590 /* KSToken.swift in Sources */,
 				C319926B1E603887007ED590 /* KSTokenField.swift in Sources */,
+				7833D9C72E2027A1002EBAD4 /* InactiveList.swift in Sources */,
 				C39BEBE41E0037350069F952 /* Horizontal.swift in Sources */,
 				C319926C1E603887007ED590 /* KSTokenView.swift in Sources */,
 				C39BEBE71E0037350069F952 /* StackView.swift in Sources */,

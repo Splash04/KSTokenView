@@ -4,6 +4,7 @@
     <dependencies>
         <deployment identifier="iOS"/>
         <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="23721"/>
+        <capability name="System colors in document resources" minToolsVersion="11.0"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
     </dependencies>
     <scenes>
@@ -40,6 +41,7 @@
                         <segue destination="l78-ay-7Oo" kind="show" identifier="identifierStackview" id="jYI-5N-r1V"/>
                         <segue destination="mJK-NW-TWd" kind="show" identifier="identifierObjectiveC" id="YKw-LI-SFh"/>
                         <segue destination="mkM-89-Hjn" kind="show" identifier="identifierHorizontal" id="W3A-3b-wNT"/>
+                        <segue destination="cBS-3y-ckd" kind="show" identifier="InactiveList" id="aKE-EO-ME8"/>
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="Nb4-ry-U8B" sceneMemberID="firstResponder"/>
@@ -95,6 +97,72 @@
                 <placeholder placeholderIdentifier="IBFirstResponder" id="SIn-20-0Th" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
             <point key="canvasLocation" x="-167.19999999999999" y="138.98050974512745"/>
+        </scene>
+        <!--Inactive List-->
+        <scene sceneID="Ey3-bX-g1x">
+            <objects>
+                <viewController storyboardIdentifier="InactiveList" id="cBS-3y-ckd" customClass="InactiveList" customModule="Examples" customModuleProvider="target" sceneMemberID="viewController">
+                    <layoutGuides>
+                        <viewControllerLayoutGuide type="top" id="Wxd-bZ-wK3"/>
+                        <viewControllerLayoutGuide type="bottom" id="9T5-FO-dWZ"/>
+                    </layoutGuides>
+                    <view key="view" contentMode="scaleToFill" id="QEr-1W-DO0">
+                        <rect key="frame" x="0.0" y="0.0" width="375" height="812"/>
+                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <subviews>
+                            <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="0Wa-I8-bVB">
+                                <rect key="frame" x="16" y="160" width="343" height="48"/>
+                                <subviews>
+                                    <view contentMode="scaleToFill" placeholderIntrinsicWidth="335" placeholderIntrinsicHeight="40" translatesAutoresizingMaskIntoConstraints="NO" id="pnK-8b-sJp" customClass="KSTokenView" customModule="Examples" customModuleProvider="target">
+                                        <rect key="frame" x="4" y="4" width="335" height="40"/>
+                                        <color key="backgroundColor" systemColor="systemBackgroundColor"/>
+                                        <constraints>
+                                            <constraint firstAttribute="height" relation="greaterThanOrEqual" constant="40" id="BFg-rn-GN2"/>
+                                        </constraints>
+                                    </view>
+                                </subviews>
+                                <color key="backgroundColor" systemColor="systemGray5Color"/>
+                                <constraints>
+                                    <constraint firstItem="pnK-8b-sJp" firstAttribute="top" secondItem="0Wa-I8-bVB" secondAttribute="top" constant="4" id="EOq-sQ-mAs"/>
+                                    <constraint firstAttribute="trailing" secondItem="pnK-8b-sJp" secondAttribute="trailing" constant="4" id="ZV1-4b-c7W"/>
+                                    <constraint firstAttribute="bottom" secondItem="pnK-8b-sJp" secondAttribute="bottom" constant="4" id="bLa-t6-j0J"/>
+                                    <constraint firstItem="pnK-8b-sJp" firstAttribute="leading" secondItem="0Wa-I8-bVB" secondAttribute="leading" constant="4" id="zJH-tV-hHR"/>
+                                </constraints>
+                                <userDefinedRuntimeAttributes>
+                                    <userDefinedRuntimeAttribute type="number" keyPath="layer.cornerRadius">
+                                        <integer key="value" value="16"/>
+                                    </userDefinedRuntimeAttribute>
+                                </userDefinedRuntimeAttributes>
+                            </view>
+                            <tableView clipsSubviews="YES" contentMode="scaleToFill" insetsLayoutMarginsFromSafeArea="NO" alwaysBounceVertical="YES" dataMode="prototypes" style="plain" separatorStyle="default" rowHeight="-1" estimatedRowHeight="-1" sectionHeaderHeight="-1" estimatedSectionHeaderHeight="-1" sectionFooterHeight="-1" estimatedSectionFooterHeight="-1" translatesAutoresizingMaskIntoConstraints="NO" id="Atf-SV-3oQ">
+                                <rect key="frame" x="0.0" y="224" width="375" height="588"/>
+                                <color key="backgroundColor" systemColor="systemBackgroundColor"/>
+                                <connections>
+                                    <outlet property="dataSource" destination="cBS-3y-ckd" id="u1Z-Qg-KiY"/>
+                                    <outlet property="delegate" destination="cBS-3y-ckd" id="A73-Fp-zjO"/>
+                                </connections>
+                            </tableView>
+                        </subviews>
+                        <color key="backgroundColor" systemColor="systemBackgroundColor"/>
+                        <constraints>
+                            <constraint firstItem="Atf-SV-3oQ" firstAttribute="top" secondItem="0Wa-I8-bVB" secondAttribute="bottom" constant="16" id="8H2-gM-IaG"/>
+                            <constraint firstAttribute="trailing" secondItem="Atf-SV-3oQ" secondAttribute="trailing" id="Ukf-eI-9rH"/>
+                            <constraint firstItem="0Wa-I8-bVB" firstAttribute="top" secondItem="Wxd-bZ-wK3" secondAttribute="bottom" constant="16" id="VPV-A4-Kn9"/>
+                            <constraint firstAttribute="trailing" secondItem="0Wa-I8-bVB" secondAttribute="trailing" constant="16" id="W1j-6y-7li"/>
+                            <constraint firstItem="Atf-SV-3oQ" firstAttribute="leading" secondItem="QEr-1W-DO0" secondAttribute="leading" id="jKa-tB-Bcc"/>
+                            <constraint firstAttribute="bottom" secondItem="Atf-SV-3oQ" secondAttribute="bottom" id="mKe-oN-ilv"/>
+                            <constraint firstItem="0Wa-I8-bVB" firstAttribute="leading" secondItem="QEr-1W-DO0" secondAttribute="leading" constant="16" id="rUS-Fh-Hte"/>
+                        </constraints>
+                    </view>
+                    <navigationItem key="navigationItem" id="iLV-wx-NQb"/>
+                    <connections>
+                        <outlet property="tableView" destination="Atf-SV-3oQ" id="4zR-FT-Ptb"/>
+                        <outlet property="tokenView" destination="pnK-8b-sJp" id="Gf5-rQ-FTZ"/>
+                    </connections>
+                </viewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="EHr-0I-QC8" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="640.79999999999995" y="928.81773399014787"/>
         </scene>
         <!--Programmatically-->
         <scene sceneID="rEI-52-Gpt">
@@ -294,6 +362,12 @@
     <resources>
         <systemColor name="darkTextColor">
             <color white="0.0" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+        </systemColor>
+        <systemColor name="systemBackgroundColor">
+            <color white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+        </systemColor>
+        <systemColor name="systemGray5Color">
+            <color red="0.89803921568627454" green="0.89803921568627454" blue="0.91764705882352937" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
         </systemColor>
     </resources>
 </document>

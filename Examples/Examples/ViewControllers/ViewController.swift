@@ -30,7 +30,7 @@ class ViewController: UIViewController {
 
     @IBOutlet weak var tableView: UITableView!
     
-    let examples = ["Autolayout", "Programtically", "UIStackView", "Horizontal", "Objective-C"]
+    let examples = ["Autolayout", "Programtically", "UIStackView", "Horizontal", "Objective-C", "Inactive List"]
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -61,11 +61,14 @@ extension ViewController: UITableViewDelegate {
         } else if indexPath.row == 4 {
             vc = storyboard.instantiateViewController(withIdentifier: "ObjectiveC")
             
+        } else if indexPath.row == 5 {
+            vc = storyboard.instantiateViewController(withIdentifier: "InactiveList")
         } else {
             vc = storyboard.instantiateViewController(withIdentifier: "TableView")
         }
         
         navigationController?.pushViewController(vc, animated: true)
+        tableView.deselectRow(at: indexPath, animated: true)
     }
 }
 

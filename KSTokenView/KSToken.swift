@@ -406,6 +406,15 @@ open class KSToken : UIControl {
             return imageEdgeInsets
         }
     }
+    
+    //MARK: - Dark mode handling
+    //__________________________________________________________________________________
+    //
+    
+    open override func traitCollectionDidChange(_ previousTraitCollection: UITraitCollection?) {
+        super.traitCollectionDidChange(previousTraitCollection)
+        guard previousTraitCollection?.userInterfaceStyle != traitCollection.userInterfaceStyle else { return }
+    }
 }
 
 //MARK: - Constants

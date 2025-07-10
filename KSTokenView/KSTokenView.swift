@@ -157,12 +157,29 @@ open class KSTokenView: UIView {
             return String(_tokenField.text![_tokenField.text!.startIndex..<self._tokenField.text!.endIndex])
         }
         set (string) {
-            _tokenField.text = KSTextEmpty+string
+            _tokenField.text = KSTextEmpty + string
+        }
+    }
+    
+    /// default is true. Disable tokenized state on end editing
+    @objc open var shouldDisableTokenizingOnEndEditing = true
+    
+    /// default is true. Enable text input on toch to the view
+    @objc open var startInputOnTouch = Constants.Defaults.startInputOnTouch {
+        didSet {
+            _updateTokenField()
         }
     }
     
     /// default is true. token can be deleted with keyboard 'x' button
     @objc open var shouldDeleteTokenOnBackspace = true
+    
+    /// default is true. token can be select with tap
+    @objc open var shouldSelectTokenOnTap = true {
+        didSet {
+            _updateTokenField()
+        }
+    }
     
     /// Only works for iPhone now, not iPad devices. default is false. If true, search results are hidden when one of them is selected
     @objc open var shouldHideSearchResultsOnSelect = false
@@ -364,7 +381,7 @@ open class KSTokenView: UIView {
     }
     
     /// default is "To: "
-    @objc open var promptText: String = "To: " {
+    @objc open var promptText: String? = "To: " {
         didSet {
             if (oldValue != promptText) {
                 _updateTokenField()
@@ -528,7 +545,7 @@ open class KSTokenView: UIView {
     }
     
     fileprivate func _removeToken(_ token: KSToken, removingAll: Bool = false) {
-        if token.sticky {return}
+        if token.sticky { return }
         if (!removingAll) {
             var shouldRemoveToken: Bool? = true
             
@@ -638,6 +655,53 @@ open class KSTokenView: UIView {
         return addedToken
     }
     
+    /**
+     Creates and add a new KSTokens List
+     
+     - parameter token: KSToken object
+     
+     - returns: KSToken object
+     */
+    @discardableResult open func addTokens(_ tokens: [KSToken]) -> [KSToken] {
+        guard _canAddMoreToken() else  {
+            return []
+        }
+        
+        var validTokens: [KSToken] = []
+        var invalidTokens: [KSToken] = []
+        
+        let currentTokensCount = _tokenField.tokens.count
+        
+        for token in tokens {
+            if ((validTokens.count + currentTokensCount) < maxTokenLimit || maxTokenLimit == -1),
+               let shouldAdd = delegate?.tokenView?(self, shouldAddToken: token),
+               !shouldAdd {
+                invalidTokens.append(token)
+            } else {
+                validTokens.append(token)
+            }
+        }
+        
+        invalidTokens.forEach { token in
+            delegate?.tokenView?(self, didFailToAdd: token)
+        }
+        
+        validTokens.forEach { token in
+            delegate?.tokenView?(self, willAddToken: token)
+            var addedToken: KSToken?
+            if let updatedToken = delegate?.tokenView?(self, shouldChangeAppearanceForToken: token) {
+                addedToken = _tokenField.addToken(updatedToken, shouldLayout: false)
+            } else {
+                addedToken = _tokenField.addToken(token, shouldLayout: false)
+            }
+            delegate?.tokenView?(self, didAddToken: addedToken!)
+        }
+        
+        _tokenField.updateLayout()
+        _ = _canAddMoreToken()
+        return validTokens
+    }
+    
     
     //MARK: - Delete Token
     //__________________________________________________________________________________
@@ -719,6 +783,19 @@ open class KSTokenView: UIView {
         return _tokenField.selectedToken
     }
     
+    /**
+     Enable tokenized state
+     */
+    open func tokenize() {
+        _tokenField.tokenize()
+    }
+    
+    /**
+     Disable tokenized state
+     */
+    open func untokenize() {
+        _tokenField.untokenize()
+    }
     
     //MARK: - KSTokenFieldDelegates
     //__________________________________________________________________________________
@@ -733,7 +810,9 @@ open class KSTokenView: UIView {
     
     func tokenFieldDidEndEditing(_ tokenField: KSTokenField) {
         delegate?.tokenViewDidEndEditing?(self)
-        tokenField.untokenize()
+        if shouldDisableTokenizingOnEndEditing {
+            tokenField.untokenize()
+        }
         _hideSearchResults()
     }
     
@@ -1072,5 +1151,7 @@ public extension KSTokenView.Constants {
         static let marginY: CGFloat = 5.0
         static let bufferX: CGFloat = 0.0
         static let separatorText: String = ", "
+        static let startInputOnTouch = true
+        static let shouldSelectTokenOnTap = true
     }
 }

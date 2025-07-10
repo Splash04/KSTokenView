@@ -2,6 +2,9 @@ KSTokenView
 ===========
 KSTokenView is a control that displays a collection of tokens in an editable UITextField and sends messages to delegate object. It can also be used to input text from user and perform search operation asynchronously. UI can be fully custimized to look like part of your application.
 
+## Deletable Tokens
+![Token without input](Assets/tokens_without_input.jpg)
+
 ## Demo
 Click [here](https://appetize.io/app/0kzy34tyg761punebrcc1x556w) for Live Preview.
 ### Vertical

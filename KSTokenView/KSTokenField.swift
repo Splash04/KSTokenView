@@ -49,6 +49,8 @@ open class KSTokenField: UITextField {
         }
     }
     fileprivate var _setupCompleted: Bool = false
+    fileprivate var _startInputOnTouch: Bool = KSTokenView.Constants.Defaults.startInputOnTouch
+    fileprivate var _shouldSelectTokenOnTap: Bool = KSTokenView.Constants.Defaults.shouldSelectTokenOnTap
     fileprivate var _selfFrame: CGRect?
     fileprivate var _caretPoint: CGPoint?
     fileprivate var _placeholderValue: String?
@@ -107,6 +109,8 @@ open class KSTokenField: UITextField {
     weak var parentView: KSTokenView? {
         willSet (tokenView) {
             if let tokenView {
+                _startInputOnTouch = tokenView.startInputOnTouch
+                _shouldSelectTokenOnTap = tokenView.shouldSelectTokenOnTap
                 _cursorColor = tokenView.cursorColor
                 _contentInset = tokenView.contentInset
                 _imagePadding = tokenView.imagePadding
@@ -176,13 +180,18 @@ open class KSTokenField: UITextField {
         _setScrollRect()
         _scrollView.backgroundColor = UIColor.clear
         _scrollView.autoresizingMask = [.flexibleWidth, .flexibleHeight]
-        let gestureRecognizer = UITapGestureRecognizer(target: self, action: #selector(UIResponder.becomeFirstResponder))
+        let gestureRecognizer = UITapGestureRecognizer(target: self, action: #selector(KSTokenField.onTapPressGestureAction(_:)))
         gestureRecognizer.cancelsTouchesInView = false
         _scrollView.addGestureRecognizer(gestureRecognizer)
         _scrollView.delegate = self
         addSubview(_scrollView)
         
         addTarget(self, action: #selector(KSTokenField.tokenFieldTextDidChange(_:)), for: UIControl.Event.editingChanged)
+    }
+    
+    @objc private func onTapPressGestureAction(_ gesture: UITapGestureRecognizer) {
+        guard _startInputOnTouch else { return }
+        _ = becomeFirstResponder()
     }
     
     fileprivate func _setScrollRect() {
@@ -240,7 +249,7 @@ open class KSTokenField: UITextField {
      
      - returns: KSToken object
      */
-    func addToken(_ token: KSToken) -> KSToken? {
+    func addToken(_ token: KSToken, shouldLayout: Bool = true) -> KSToken? {
         if token.title.isEmpty {
             token.title = "Untitled"
         }
@@ -252,7 +261,7 @@ open class KSTokenField: UITextField {
             token.addGestureRecognizer(longPressGesture)
             
             tokens.append(token)
-            _insertToken(token)
+            _insertToken(token, shouldLayout: shouldLayout)
         }
         
         return token
@@ -552,7 +561,7 @@ open class KSTokenField: UITextField {
             (leftViewMode == .whileEditing && !isEditing)) {
             return .zero
         }
-        return leftView!.frame
+        return leftView?.frame ?? .zero
     }
     
     fileprivate func _rightViewRect() -> CGRect {
@@ -586,6 +595,7 @@ open class KSTokenField: UITextField {
             leftView = label
         } else {
             leftView = nil
+            leftViewMode = .never
         }
         _setScrollRect()
     }
@@ -649,7 +659,7 @@ open class KSTokenField: UITextField {
         } else {
             let newPlaceholderLabel = UILabel(frame: CGRect(
                 x: xPos,
-                y: leftView!.frame.origin.y,
+                y: leftView?.frame.origin.y ?? 0,
                 width: _selfFrame!.width - xPos - _leftViewRect().size.width,
                 height: _leftViewRect().size.height
             ))
@@ -675,7 +685,7 @@ open class KSTokenField: UITextField {
     }
     
     func selectToken(_ token: KSToken) {
-        guard !token.sticky else { return }
+        guard !token.sticky, _shouldSelectTokenOnTap else { return }
         
         for token: KSToken in tokens {
             if isSelectedToken(token) {
