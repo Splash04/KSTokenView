@@ -1075,6 +1075,10 @@ extension KSTokenView : UITextFieldDelegate {
         return true
     }
     
+    public func textFieldShouldBeginEditing(_ textField: UITextField) -> Bool {
+        startInputOnTouch
+    }
+    
 }
 
 //MARK: - Extension UITableViewDelegate

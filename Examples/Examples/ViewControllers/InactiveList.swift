@@ -30,6 +30,7 @@ class InactiveList: UIViewController {
         tokenView.style = .squared
         tokenView.backgroundColor = .clear
         tokenView.shouldSelectTokenOnTap = false
+        tokenView.minWidthForInput = 0
         tokenView.tokenize()
 
         var initialTokens: [KSToken] = []
@@ -53,7 +54,9 @@ class InactiveList: UIViewController {
 extension InactiveList: UITableViewDelegate {
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         let token = tagForTitle(title: names[indexPath.row])
-        tokenView.addToken(token)
+        UIView.animate(withDuration: 0.5, delay: 0, options: .curveEaseInOut, animations: { [weak self, token] in
+            self?.tokenView.addToken(token)
+        }, completion: nil)
         tableView.deselectRow(at: indexPath, animated: true)
     }
 }
@@ -86,6 +89,8 @@ extension InactiveList: KSTokenViewDelegate {
     func tokenView(_ tokenView: KSTokenView, didDeleteToken token: KSToken) {}
     func tokenViewDidDeleteAllToken(_ tokenView: KSTokenView) {}
     func tokenView(_ tokenView: KSTokenView, didClickOnTokenImage token: KSToken) {
-        tokenView.deleteToken(token)
+        UIView.animate(withDuration: 0.5, delay: 0, options: .curveEaseInOut, animations: { [weak self, token] in
+            self?.tokenView.deleteToken(token)
+        }, completion: nil)
     }
 }
